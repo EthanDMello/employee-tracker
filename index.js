@@ -5,9 +5,7 @@ const mysql = require("mysql2");
 const db = mysql.createConnection(
   {
     host: "localhost",
-    // MySQL username,
     user: "root",
-    // TODO: Add MySQL password here
     password: "",
     database: "employee_db",
   },
@@ -101,13 +99,4 @@ app.put("/api/review/:id", (req, res) => {
       });
     }
   });
-});
-
-// Default response for any other request (Not Found)
-app.use((req, res) => {
-  res.status(404).end();
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });

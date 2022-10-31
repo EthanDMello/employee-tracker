@@ -1,15 +1,16 @@
-CREATE DATABASE IF NOT EXISTS employee_db;
+DROP DATABASE IF EXISTS employee_db;
+CREATE DATABASE employee_db;
 
 USE employee_db;
 
-CREATE TABLE employees(
-  id INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE employee(
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
   employee_first_name VARCHAR(30) NOT NULL,
   employee_last_name VARCHAR(30) NOT NULL,
   job_title VARCHAR(30) NOT NULL,
   department VARCHAR(30) NOT NULL,
   manager VARCHAR(30) NOT NULL,
-  salery INT NOT NULL,
+  salery INT NOT NULL
 );
 
 CREATE TABLE departments(
