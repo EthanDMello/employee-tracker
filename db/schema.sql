@@ -7,10 +7,11 @@ CREATE TABLE employee(
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   employee_first_name VARCHAR(30) NOT NULL,
   employee_last_name VARCHAR(30) NOT NULL,
-  job_title VARCHAR(30) NOT NULL,
-  department VARCHAR(30) NOT NULL,
+  employee_role VARCHAR(30) NOT NULL,
+  department VARCHAR(30),
+  employee_job_title VARCHAR(30),
   manager VARCHAR(30) NOT NULL,
-  salary INT NOT NULL
+  salary INT
 );
 
 CREATE TABLE departments(

@@ -17,7 +17,7 @@ const db = mysql.createConnection(
 
 // Create a new employee in database
 const newEmployee = (data) => {
-  const sql = `INSERT INTO employee (employee_first_name, employee_last_name, job_title, department, manager, salary) VALUES (?,?,?,?,?,?)`;
+  const sql = `INSERT INTO employee (employee_first_name, employee_last_name, employee_role, manager) VALUES (?,?,?,?)`;
 
   db.query(sql, data, (err, result) => {
     if (err) {
@@ -38,19 +38,28 @@ const newDepartment = (data) => {
   });
 };
 
-const newRole = async (data) => {
-  try {
-    const sql = `INSERT INTO roles (employee_first_name, salary, department_name) VALUES (?,?,?)`;
+const newRole = (data) => {
+  const sql = `INSERT INTO roles (employee_first_name, salary, department_name) VALUES (?,?,?)`;
 
-    db.query(sql, data);
-  } catch {
-    (err, result) => {
-      if (err) {
-        console.log("error in adding new role", err.code);
-        return;
-      }
-    };
-  }
+  db.query(sql, data, (err, result) => {
+    if (err) {
+      console.log(`\n ERROR IN ADDING NEW ROLE`, err.code);
+      return;
+    }
+  });
+};
+
+// update employee function
+const updateEmployeeRole = (data) => {
+  const sql = `UPDATE employee SET employee_role = ? WHERE id = ?`;
+
+  db.query(sql, data, (err, result) => {
+    if (err) {
+      console.log("error in updating employee:", err.message);
+    } else {
+      console.log("Employee updated.");
+    }
+  });
 };
 
 const employeeData = [
@@ -78,36 +87,27 @@ const employeePrompt = () => {
       },
       {
         type: "input",
-        message: "Please input your employee job title:",
-        name: "job_title",
-      },
-      {
-        type: "input",
-        message: "Please input your employee department:",
-        name: "department",
+        message: "Please input your employee role:",
+        name: "employee_role",
       },
       {
         type: "input",
         message: "Please input your employee manager:",
         name: "manager",
       },
-      {
-        type: "input",
-        message: "Please input your employee salary:",
-        name: "salary",
-      },
     ])
     .then((answers) => {
       newEmployee(Object.values(answers));
-      mainMenu();
+      console.log("New employee added!");
+      mainMenuPrompt();
     })
     .catch((error) => {
-      if (error.isTtyError) {
+      if (error) {
         console.log("Prompt couldn't be rendered in the current environment");
       } else {
         console.log("Something else went wrong");
       }
-      mainMenu();
+      mainMenuPrompt();
     });
 };
 
@@ -123,7 +123,7 @@ const departmentPrompt = () => {
     ])
     .then((answers) => {
       newDepartment(Object.values(answers));
-      mainMenu();
+      mainMenuPrompt();
     });
 };
 
@@ -149,12 +149,33 @@ const rolePrompt = () => {
     ])
     .then((answers) => {
       newRole(Object.values(answers));
-      mainMenu();
+      mainMenuPrompt();
+    });
+};
+
+// update employee prompt
+const updateEmployeeRolePrompt = () => {
+  ask
+    .prompt([
+      {
+        type: "input",
+        message: "Please input the new employee role:",
+        name: "employee_role",
+      },
+      {
+        type: "input",
+        message: "Please input the employee id:",
+        name: "employee_id",
+      },
+    ])
+    .then((data) => {
+      updateEmployeeRole(Object.values(data));
+      mainMenuPrompt();
     });
 };
 
 // main menu prompt
-const mainMenu = () => {
+const mainMenuPrompt = () => {
   ask
     .prompt([
       {
@@ -197,12 +218,13 @@ const mainMenu = () => {
           break;
         case "Update an employee role":
           console.log(response.option);
+          updateEmployeeRolePrompt();
           break;
       }
     });
 };
 
-mainMenu();
+mainMenuPrompt();
 
 // // Read all movies
 // app.get("/api/movies", (req, res) => {
@@ -254,27 +276,5 @@ mainMenu();
 //       message: "success",
 //       data: rows,
 //     });
-//   });
-// });
-
-// // BONUS: Update review name
-// app.put("/api/review/:id", (req, res) => {
-//   const sql = `UPDATE reviews SET review = ? WHERE id = ?`;
-//   const params = [req.body.review, req.params.id];
-
-//   db.query(sql, params, (err, result) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//     } else if (!result.affectedRows) {
-//       res.json({
-//         message: "Movie not found",
-//       });
-//     } else {
-//       res.json({
-//         message: "success",
-//         data: req.body,
-//         changes: result.affectedRows,
-//       });
-//     }
 //   });
 // });
