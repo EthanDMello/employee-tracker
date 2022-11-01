@@ -24,20 +24,33 @@ const newEmployee = (data) => {
       console.log("error in new employee query", err);
       return;
     }
-    console.log("data added:", result);
   });
 };
 
 const newDepartment = (data) => {
-  const sql = `INSERT INTO employee (employee_first_name, employee_last_name, job_title, department, manager, salary) VALUES (?,?,?,?,?,?)`;
+  const sql = `INSERT INTO departments (department_name) VALUES (?)`;
 
   db.query(sql, data, (err, result) => {
     if (err) {
-      console.log("error in new employee query", err);
+      console.log("error in new department query", err);
       return;
     }
-    console.log("data added:", result);
   });
+};
+
+const newRole = async (data) => {
+  try {
+    const sql = `INSERT INTO roles (employee_first_name, salary, department_name) VALUES (?,?,?)`;
+
+    db.query(sql, data);
+  } catch {
+    (err, result) => {
+      if (err) {
+        console.log("error in adding new role", err.code);
+        return;
+      }
+    };
+  }
 };
 
 const employeeData = [
@@ -86,6 +99,7 @@ const employeePrompt = () => {
     ])
     .then((answers) => {
       newEmployee(Object.values(answers));
+      mainMenu();
     })
     .catch((error) => {
       if (error.isTtyError) {
@@ -93,6 +107,49 @@ const employeePrompt = () => {
       } else {
         console.log("Something else went wrong");
       }
+      mainMenu();
+    });
+};
+
+// new department prompt
+const departmentPrompt = () => {
+  ask
+    .prompt([
+      {
+        type: "input",
+        message: "Please input your new department name:",
+        name: "department_name",
+      },
+    ])
+    .then((answers) => {
+      newDepartment(Object.values(answers));
+      mainMenu();
+    });
+};
+
+// new roles prompt
+const rolePrompt = () => {
+  ask
+    .prompt([
+      {
+        type: "input",
+        message: "Please input your new role name:",
+        name: "role_name",
+      },
+      {
+        type: "input",
+        message: "Please input your new salary:",
+        name: "salary",
+      },
+      {
+        type: "input",
+        message: "Please input your new department name:",
+        name: "department_name",
+      },
+    ])
+    .then((answers) => {
+      newRole(Object.values(answers));
+      mainMenu();
     });
 };
 
@@ -124,6 +181,21 @@ const mainMenu = () => {
           console.log(response.option);
           break;
         case "View all employees":
+          console.log(response.option);
+          break;
+        case "Add a department":
+          console.log(response.option);
+          departmentPrompt();
+          break;
+        case "Add a role":
+          console.log(response.option);
+          rolePrompt();
+          break;
+        case "Add an employee":
+          console.log(response.option);
+          employeePrompt();
+          break;
+        case "Update an employee role":
           console.log(response.option);
           break;
       }

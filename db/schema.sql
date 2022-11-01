@@ -14,13 +14,13 @@ CREATE TABLE employee(
 );
 
 CREATE TABLE departments(
-  id INT NOT NULL,
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   department_name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE roles(
-  id INT NOT NULL,
-  employee_first_name VARCHAR(30) NOT NULL,
-  salery INT NOT NULL,
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  role_name VARCHAR(30) NOT NULL,
+  salary INT NOT NULL,
   department_name VARCHAR(30) NOT NULL
 );
