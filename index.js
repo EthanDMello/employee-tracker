@@ -15,9 +15,9 @@ const db = mysql.createConnection(
   console.log(`Connected to the employee_db database.`)
 );
 
-// Create a new employee
+// Create a new employee in database
 const newEmployee = (data) => {
-  const sql = `INSERT INTO employee (employee_first_name, employee_last_name, job_title, department, manager, salary) VALUES (?)`;
+  const sql = `INSERT INTO employee (employee_first_name, employee_last_name, job_title, department, manager, salary) VALUES (?,?,?,?,?,?)`;
 
   db.query(sql, data, (err, result) => {
     if (err) {
@@ -28,15 +28,109 @@ const newEmployee = (data) => {
   });
 };
 
-const employeeData = {
-  employee_first_name: "Ethan",
-  employee_last_name: "DMello",
-  job_title: "Fullstack Dev",
-  department: "deez",
-  manager: "Neha",
-  salary: 25000,
+const newDepartment = (data) => {
+  const sql = `INSERT INTO employee (employee_first_name, employee_last_name, job_title, department, manager, salary) VALUES (?,?,?,?,?,?)`;
+
+  db.query(sql, data, (err, result) => {
+    if (err) {
+      console.log("error in new employee query", err);
+      return;
+    }
+    console.log("data added:", result);
+  });
 };
-newEmployee(employeeData);
+
+const employeeData = [
+  "Ethan",
+  "DMello",
+  "Fullstack Dev",
+  "deez",
+  "Neha",
+  25000,
+];
+
+// prompt function for getting data through inquirer for a new employee
+const employeePrompt = () => {
+  ask
+    .prompt([
+      {
+        type: "input",
+        message: "Please input your employee first name:",
+        name: "employee_first_name",
+      },
+      {
+        type: "input",
+        message: "Please input your employee last name:",
+        name: "employee_last_name",
+      },
+      {
+        type: "input",
+        message: "Please input your employee job title:",
+        name: "job_title",
+      },
+      {
+        type: "input",
+        message: "Please input your employee department:",
+        name: "department",
+      },
+      {
+        type: "input",
+        message: "Please input your employee manager:",
+        name: "manager",
+      },
+      {
+        type: "input",
+        message: "Please input your employee salary:",
+        name: "salary",
+      },
+    ])
+    .then((answers) => {
+      newEmployee(Object.values(answers));
+    })
+    .catch((error) => {
+      if (error.isTtyError) {
+        console.log("Prompt couldn't be rendered in the current environment");
+      } else {
+        console.log("Something else went wrong");
+      }
+    });
+};
+
+// main menu prompt
+const mainMenu = () => {
+  ask
+    .prompt([
+      {
+        type: "list",
+        message: "What would you like to do?",
+        name: "option",
+        choices: [
+          "View all departments",
+          "View all roles",
+          "View all employees",
+          "Add a department",
+          "Add a role",
+          "Add an employee",
+          "Update an employee role",
+        ],
+      },
+    ])
+    .then((response) => {
+      switch (response.option) {
+        case "View all departments":
+          console.log(response.option);
+          return;
+        case "View all roles":
+          console.log(response.option);
+          break;
+        case "View all employees":
+          console.log(response.option);
+          break;
+      }
+    });
+};
+
+mainMenu();
 
 // // Read all movies
 // app.get("/api/movies", (req, res) => {
