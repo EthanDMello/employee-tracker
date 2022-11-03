@@ -46,7 +46,27 @@ const newDepartment = (data) => {
 
 // create new role query
 const newRole = (data) => {
-  const sql = `INSERT INTO roles (role_name, salary, department_name) VALUES (?,?,?)`;
+  // get department data
+  let selectedDepartmentId;
+  console.log(data, "newrole data");
+  db.query(
+    `SELECT id FROM departments WHERE department_name = ${data[2]};`,
+    (err, result) => {
+      if (err) {
+        console.log(
+          "error in fetching departments:",
+          err.message,
+          "\n Please try again"
+        );
+        rolePrompt();
+      }
+      console.log(result);
+      selectedDepartmentId = result;
+    }
+  );
+
+  // create new role
+  const sql = `INSERT INTO roles (role_name, salary, department_id) VALUES (?,?,?)`;
 
   db.query(sql, data, (err, result) => {
     if (err) {
@@ -232,6 +252,7 @@ const rolePrompt = () => {
     ])
     .then((answers) => {
       newRole(Object.values(answers));
+      console.log(answers);
     });
 };
 
