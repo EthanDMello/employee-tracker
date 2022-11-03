@@ -16,7 +16,7 @@ const db = mysql.createConnection(
   console.log(`Connected to the employee_db database.`)
 );
 
-// Create a new employee in database
+// Create a new employee query
 const newEmployee = (data) => {
   const sql = `INSERT INTO employee (employee_first_name, employee_last_name, employee_role, manager) VALUES (?,?,?,?)`;
 
@@ -30,6 +30,7 @@ const newEmployee = (data) => {
   });
 };
 
+// create new department query
 const newDepartment = (data) => {
   const sql = `INSERT INTO departments (department_name) VALUES (?)`;
 
@@ -43,6 +44,7 @@ const newDepartment = (data) => {
   });
 };
 
+// create new role query
 const newRole = (data) => {
   const sql = `INSERT INTO roles (role_name, salary, department_name) VALUES (?,?,?)`;
 
@@ -194,6 +196,21 @@ const departmentPrompt = () => {
 
 // new roles prompt
 const rolePrompt = () => {
+  let departments = [];
+  // get all departments
+  db.query(`SELECT department_name FROM departments;`, (err, result) => {
+    if (err) {
+      console.log(
+        "error in fetching departments:",
+        err.message,
+        "\n Please try again"
+      );
+      mainMenuPrompt();
+    }
+    result.forEach((departmentName) => {
+      departments.push(Object.values(departmentName).toString());
+    });
+  });
   ask
     .prompt([
       {
@@ -207,9 +224,10 @@ const rolePrompt = () => {
         name: "salary",
       },
       {
-        type: "input",
+        type: "list",
         message: "Please input your new department name:",
-        name: "department_name",
+        name: "department_id",
+        choices: departments,
       },
     ])
     .then((answers) => {
@@ -243,7 +261,8 @@ const mainMenuPrompt = () => {
     .prompt([
       {
         type: "list",
-        message: "What would you like to do?",
+        message:
+          "What would you like to do? \n To add employee please add department -> add role -> add employee",
         name: "option",
         choices: [
           "View all departments",
