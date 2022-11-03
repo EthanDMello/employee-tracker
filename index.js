@@ -84,7 +84,7 @@ const updateEmployeeRole = (data) => {
 
 // function to view all employees
 const viewEmployees = () => {
-  const sql = `SELECT * FROM employee;`;
+  const sql = `SELECT employee.id, employee.employee_first_name, employee.employee_last_name, employee.manager FROM employee;`;
 
   db.query(sql, (err, result) => {
     if (err) {
