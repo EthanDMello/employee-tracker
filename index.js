@@ -3,6 +3,7 @@
 import mysql from "mysql2";
 // const ask = require("inquirer");
 import ask from "inquirer";
+import toTable from "console.table";
 
 // Connect to database
 const db = mysql.createConnection(
@@ -24,6 +25,7 @@ const newEmployee = (data) => {
       console.log("error in new employee query", err);
       return;
     }
+    console.log("New employee added!");
   });
 };
 
@@ -43,7 +45,7 @@ const newRole = (data) => {
 
   db.query(sql, data, (err, result) => {
     if (err) {
-      console.log(`\n ERROR IN ADDING NEW ROLE`, err.code);
+      console.log(`\n ERROR IN ADDING NEW ROLE`, err.code, "Please try again");
       return;
     }
   });
@@ -62,14 +64,19 @@ const updateEmployeeRole = (data) => {
   });
 };
 
-const employeeData = [
-  "Ethan",
-  "DMello",
-  "Fullstack Dev",
-  "deez",
-  "Neha",
-  25000,
-];
+// function to view all employees
+const viewEmployees = () => {
+  const sql = `SELECT * FROM employee;`;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log("error in updating employee:", err.message);
+    } else {
+      console.table(result);
+      mainMenuPrompt();
+    }
+  });
+};
 
 // prompt function for getting data through inquirer for a new employee
 const employeePrompt = () => {
