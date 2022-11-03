@@ -7,21 +7,19 @@ CREATE TABLE employee(
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   employee_first_name VARCHAR(30) NOT NULL,
   employee_last_name VARCHAR(30) NOT NULL,
-  employee_role VARCHAR(30) NOT NULL,
-  department VARCHAR(30),
-  employee_job_title VARCHAR(30),
+  employee_role VARCHAR(30) FOREIGN KEY,
   manager VARCHAR(30) NOT NULL,
   salary INT
-);
-
-CREATE TABLE departments(
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  department_name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE roles(
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   role_name VARCHAR(30) NOT NULL,
   salary INT NOT NULL,
+  department_id VARCHAR(30) FOREIGN KEY
+);
+
+CREATE TABLE departments(
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   department_name VARCHAR(30) NOT NULL
 );

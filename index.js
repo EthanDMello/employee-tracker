@@ -3,7 +3,7 @@
 import mysql from "mysql2";
 // const ask = require("inquirer");
 import ask from "inquirer";
-import toTable from "console.table";
+// import toTable from "console.table";
 
 // Connect to database
 const db = mysql.createConnection(
@@ -26,6 +26,7 @@ const newEmployee = (data) => {
       return;
     }
     console.log("New employee added!");
+    mainMenuPrompt();
   });
 };
 
@@ -34,20 +35,29 @@ const newDepartment = (data) => {
 
   db.query(sql, data, (err, result) => {
     if (err) {
-      console.log("error in new department query", err);
+      console.log("error in new department query", err, "\n Please try again");
+      departmentPrompt();
       return;
     }
+    mainMenuPrompt();
   });
 };
 
 const newRole = (data) => {
-  const sql = `INSERT INTO roles (employee_first_name, salary, department_name) VALUES (?,?,?)`;
+  const sql = `INSERT INTO roles (role_name, salary, department_name) VALUES (?,?,?)`;
 
   db.query(sql, data, (err, result) => {
     if (err) {
-      console.log(`\n ERROR IN ADDING NEW ROLE`, err.code, "Please try again");
+      console.log(
+        `\n ERROR IN ADDING NEW ROLE`,
+        err.code,
+        "\n Please try again"
+      );
+      rolePrompt();
       return;
     }
+    console.log("New role added!");
+    mainMenuPrompt();
   });
 };
 
@@ -57,9 +67,15 @@ const updateEmployeeRole = (data) => {
 
   db.query(sql, data, (err, result) => {
     if (err) {
-      console.log("error in updating employee:", err.message);
+      console.log(
+        "error in updating employee:",
+        err.message,
+        "\n Please try again"
+      );
+      updateEmployeeRolePrompt();
     } else {
       console.log("Employee updated.");
+      mainMenuPrompt();
     }
   });
 };
@@ -70,7 +86,12 @@ const viewEmployees = () => {
 
   db.query(sql, (err, result) => {
     if (err) {
-      console.log("error in updating employee:", err.message);
+      console.log(
+        "error in viewing employees:",
+        err.message,
+        "\n Please try again"
+      );
+      mainMenuPrompt();
     } else {
       console.table(result);
       mainMenuPrompt();
@@ -78,6 +99,45 @@ const viewEmployees = () => {
   });
 };
 
+// function to view all roles
+const viewRoles = () => {
+  const sql = `SELECT * FROM roles;`;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(
+        "error in viewing roles:",
+        err.message,
+        "\n Please try again"
+      );
+      mainMenuPrompt();
+    } else {
+      console.table(result);
+      mainMenuPrompt();
+    }
+  });
+};
+
+// function to view all departments
+const viewDepartments = () => {
+  const sql = `SELECT * FROM departments;`;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(
+        "error in viewing departments:",
+        err.message,
+        "\n Please try again"
+      );
+      mainMenuPrompt();
+    } else {
+      console.table(result);
+      mainMenuPrompt();
+    }
+  });
+};
+
+// PROMPTS
 // prompt function for getting data through inquirer for a new employee
 const employeePrompt = () => {
   ask
@@ -106,15 +166,14 @@ const employeePrompt = () => {
     .then((answers) => {
       newEmployee(Object.values(answers));
       console.log("New employee added!");
-      mainMenuPrompt();
     })
     .catch((error) => {
       if (error) {
         console.log("Prompt couldn't be rendered in the current environment");
       } else {
-        console.log("Something else went wrong");
+        console.log("Something else went wrong, please try again");
       }
-      mainMenuPrompt();
+      employeePrompt();
     });
 };
 
@@ -130,7 +189,6 @@ const departmentPrompt = () => {
     ])
     .then((answers) => {
       newDepartment(Object.values(answers));
-      mainMenuPrompt();
     });
 };
 
@@ -156,7 +214,6 @@ const rolePrompt = () => {
     ])
     .then((answers) => {
       newRole(Object.values(answers));
-      mainMenuPrompt();
     });
 };
 
@@ -177,7 +234,6 @@ const updateEmployeeRolePrompt = () => {
     ])
     .then((data) => {
       updateEmployeeRole(Object.values(data));
-      mainMenuPrompt();
     });
 };
 
@@ -204,12 +260,15 @@ const mainMenuPrompt = () => {
       switch (response.option) {
         case "View all departments":
           console.log(response.option);
+          viewDepartments();
           return;
         case "View all roles":
           console.log(response.option);
+          viewRoles();
           break;
         case "View all employees":
           console.log(response.option);
+          viewEmployees();
           break;
         case "Add a department":
           console.log(response.option);
