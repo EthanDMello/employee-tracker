@@ -3,7 +3,6 @@
 import mysql from "mysql2";
 // const ask = require("inquirer");
 import ask from "inquirer";
-// import toTable from "console.table";
 
 // Connect to database
 const db = mysql.createConnection(
@@ -18,7 +17,7 @@ const db = mysql.createConnection(
 
 // Create a new employee query
 const newEmployee = (data) => {
-  const sql = `INSERT INTO employee (employee_first_name, employee_last_name, employee_role, manager) VALUES (?,?,?,?)`;
+  const sql = `INSERT INTO employee (employee_first_name, employee_last_name, role_id, manager) VALUES (?,?,?,?)`;
 
   db.query(sql, data, (err, result) => {
     if (err) {
@@ -46,25 +45,6 @@ const newDepartment = (data) => {
 
 // create new role query
 const newRole = (data) => {
-  // get department data
-  let selectedDepartmentId;
-  console.log(data, "newrole data");
-  db.query(
-    `SELECT id FROM departments WHERE department_name = ${data[2]};`,
-    (err, result) => {
-      if (err) {
-        console.log(
-          "error in fetching departments:",
-          err.message,
-          "\n Please try again"
-        );
-        rolePrompt();
-      }
-      console.log(result);
-      selectedDepartmentId = result;
-    }
-  );
-
   // create new role
   const sql = `INSERT INTO roles (role_name, salary, department_id) VALUES (?,?,?)`;
 
@@ -162,6 +142,22 @@ const viewDepartments = () => {
 // PROMPTS
 // prompt function for getting data through inquirer for a new employee
 const employeePrompt = () => {
+  let roles = [];
+  // get all departments
+  db.query(`SELECT id FROM roles;`, (err, result) => {
+    if (err) {
+      console.log(
+        "error in fetching role ids:",
+        err.message,
+        "\n Please try again"
+      );
+      mainMenuPrompt();
+    }
+    result.forEach((roleId) => {
+      roles.push(Object.values(roleId).toString());
+    });
+    console.log(roles);
+  });
   ask
     .prompt([
       {
@@ -175,9 +171,10 @@ const employeePrompt = () => {
         name: "employee_last_name",
       },
       {
-        type: "input",
-        message: "Please input your employee role:",
-        name: "employee_role",
+        type: "list",
+        message: "Please choose your employee role id:",
+        name: "role_id",
+        choices: roles,
       },
       {
         type: "input",
@@ -187,13 +184,10 @@ const employeePrompt = () => {
     ])
     .then((answers) => {
       newEmployee(Object.values(answers));
-      console.log("New employee added!");
     })
     .catch((error) => {
       if (error) {
-        console.log("Prompt couldn't be rendered in the current environment");
-      } else {
-        console.log("Something else went wrong, please try again");
+        console.log("Error is making new employee:", err);
       }
       employeePrompt();
     });
@@ -218,7 +212,7 @@ const departmentPrompt = () => {
 const rolePrompt = () => {
   let departments = [];
   // get all departments
-  db.query(`SELECT department_name FROM departments;`, (err, result) => {
+  db.query(`SELECT id FROM departments;`, (err, result) => {
     if (err) {
       console.log(
         "error in fetching departments:",
@@ -245,14 +239,13 @@ const rolePrompt = () => {
       },
       {
         type: "list",
-        message: "Please input your new department name:",
+        message: "Please input your new department id:",
         name: "department_id",
         choices: departments,
       },
     ])
     .then((answers) => {
       newRole(Object.values(answers));
-      console.log(answers);
     });
 };
 
