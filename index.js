@@ -84,7 +84,10 @@ const updateEmployeeRole = (data) => {
 
 // function to view all employees
 const viewEmployees = () => {
-  const sql = `SELECT employee.id, employee.employee_first_name, employee.employee_last_name, employee.manager FROM employee;`;
+  const sql = `SELECT employee.id, employee.employee_first_name, employee.employee_last_name, roles.role_name, roles.salary, departments.department_name, employee.manager
+  FROM employee
+  INNER JOIN roles ON employee.role_id = roles.id
+  inner join departments on roles.department_id = departments.id ;`;
 
   db.query(sql, (err, result) => {
     if (err) {
@@ -144,7 +147,7 @@ const viewDepartments = () => {
 const employeePrompt = () => {
   let roles = [];
   // get all departments
-  db.query(`SELECT id FROM roles;`, (err, result) => {
+  db.query(`SELECT id, role_name FROM roles;`, (err, result) => {
     if (err) {
       console.log(
         "error in fetching role ids:",
@@ -154,9 +157,8 @@ const employeePrompt = () => {
       mainMenuPrompt();
     }
     result.forEach((roleId) => {
-      roles.push(Object.values(roleId).toString());
+      roles.push(Object.values(roleId).join(" "));
     });
-    console.log(roles);
   });
   ask
     .prompt([
@@ -183,11 +185,13 @@ const employeePrompt = () => {
       },
     ])
     .then((answers) => {
+      const newId = answers.role_id.split(" ");
+      answers.role_id = newId[0];
       newEmployee(Object.values(answers));
     })
     .catch((error) => {
       if (error) {
-        console.log("Error is making new employee:", err);
+        console.log("Error is making new employee:", error);
       }
       employeePrompt();
     });
@@ -212,7 +216,7 @@ const departmentPrompt = () => {
 const rolePrompt = () => {
   let departments = [];
   // get all departments
-  db.query(`SELECT id FROM departments;`, (err, result) => {
+  db.query(`SELECT id, department_name FROM departments;`, (err, result) => {
     if (err) {
       console.log(
         "error in fetching departments:",
@@ -222,7 +226,7 @@ const rolePrompt = () => {
       mainMenuPrompt();
     }
     result.forEach((departmentName) => {
-      departments.push(Object.values(departmentName).toString());
+      departments.push(Object.values(departmentName).join(" "));
     });
   });
   ask
@@ -245,23 +249,44 @@ const rolePrompt = () => {
       },
     ])
     .then((answers) => {
+      const newId = answers.department_id.split(" ");
+      answers.department_id = newId[0];
       newRole(Object.values(answers));
     });
 };
 
 // update employee prompt
 const updateEmployeeRolePrompt = () => {
+  let employees = [];
+  db.query(
+    `SELECT id, employee_first_name, employee_last_name FROM employee;`,
+    (err, result) => {
+      if (err) {
+        console.log(
+          "error in fetching employees to update:",
+          err.message,
+          "\n Please try again"
+        );
+        mainMenuPrompt();
+      }
+      result.forEach((employeeName) => {
+        employees.push(Object.values(employeeName).join(" "));
+      });
+      console.log(employees);
+    }
+  );
   ask
     .prompt([
       {
-        type: "input",
-        message: "Please input the new employee role:",
-        name: "employee_role",
+        type: "list",
+        message: "Please choose the employee to update:",
+        name: "employee_id",
+        choices: employees,
       },
       {
-        type: "input",
-        message: "Please input the employee id:",
-        name: "employee_id",
+        type: "list",
+        message: "Please choose the new employee role:",
+        name: "employee_role",
       },
     ])
     .then((data) => {
