@@ -1,8 +1,8 @@
 // importing and requiring mysql
-// const mysql = require("mysql2");
 import mysql from "mysql2";
-// const ask = require("inquirer");
 import ask from "inquirer";
+// import promise mysql2
+import mysql2 from "mysql2/promise";
 
 // Connect to database
 const db = mysql.createConnection(
@@ -256,32 +256,31 @@ const rolePrompt = () => {
 };
 
 // update employee prompt
-const updateEmployeeRolePrompt = () => {
-  let employees = [];
-  db.query(
-    `SELECT id, employee_first_name, employee_last_name FROM employee;`,
-    (err, result) => {
-      if (err) {
-        console.log(
-          "error in fetching employees to update:",
-          err.message,
-          "\n Please try again"
-        );
-        mainMenuPrompt();
-      }
-      result.forEach((employeeName) => {
-        employees.push(Object.values(employeeName).join(" "));
-      });
-      console.log(employees);
-    }
+async function updateEmployeeRolePrompt() {
+  let foundEmployees = [];
+  // create the connection
+  const connection = await mysql2.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "employee_db",
+  });
+  // query database and wait
+  const [employees] = await connection.execute(
+    `SELECT id, employee_first_name, employee_last_name FROM employee;`
   );
+  // format results from query
+  employees.forEach((employeeName) => {
+    foundEmployees.push(Object.values(employeeName).join(" "));
+  });
+  console.log(foundEmployees, "before ask");
   ask
     .prompt([
       {
         type: "list",
         message: "Please choose the employee to update:",
         name: "employee_id",
-        choices: employees,
+        choices: foundEmployees,
       },
       {
         type: "list",
@@ -292,7 +291,7 @@ const updateEmployeeRolePrompt = () => {
     .then((data) => {
       updateEmployeeRole(Object.values(data));
     });
-};
+}
 
 // main menu prompt
 const mainMenuPrompt = () => {
