@@ -65,9 +65,16 @@ const newRole = (data) => {
 
 // update employee function
 const updateEmployeeRole = (data) => {
-  const sql = `UPDATE employee SET employee_role = ? WHERE id = ?`;
-
-  db.query(sql, data, (err, result) => {
+  const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+  let newData = [];
+  data.forEach((dataSet) => {
+    newData.push(dataSet.split(" "));
+  });
+  let newNewData = [];
+  newNewData.push(newData[0][0]);
+  newNewData.push(newData[1][0]);
+  console.log(newNewData);
+  db.query(sql, newNewData, (err, result) => {
     if (err) {
       console.log(
         "error in updating employee:",
@@ -265,7 +272,7 @@ async function updateEmployeeRolePrompt() {
     password: "",
     database: "employee_db",
   });
-  // query database and wait
+  // get employees
   const [employees] = await connection.execute(
     `SELECT id, employee_first_name, employee_last_name FROM employee;`
   );
@@ -273,7 +280,17 @@ async function updateEmployeeRolePrompt() {
   employees.forEach((employeeName) => {
     foundEmployees.push(Object.values(employeeName).join(" "));
   });
-  console.log(foundEmployees, "before ask");
+
+  // get roles
+  let roles = [];
+  const [rolesFound] = await connection.execute(
+    `SELECT id, role_name FROM roles;`
+  );
+  // format results from query
+  rolesFound.forEach((roleName) => {
+    roles.push(Object.values(roleName).join(" "));
+  });
+  console.log(roles, foundEmployees, "before ask");
   ask
     .prompt([
       {
@@ -286,6 +303,7 @@ async function updateEmployeeRolePrompt() {
         type: "list",
         message: "Please choose the new employee role:",
         name: "employee_role",
+        choices: roles,
       },
     ])
     .then((data) => {
@@ -348,56 +366,3 @@ const mainMenuPrompt = () => {
 };
 
 mainMenuPrompt();
-
-// // Read all movies
-// app.get("/api/movies", (req, res) => {
-//   const sql = `SELECT id, movie_name AS title FROM movies`;
-
-//   db.query(sql, (err, rows) => {
-//     if (err) {
-//       res.status(500).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: "success",
-//       data: rows,
-//     });
-//   });
-// });
-
-// // Delete a movie
-// app.delete("/api/movie/:id", (req, res) => {
-//   const sql = `DELETE FROM movies WHERE id = ?`;
-//   const params = [req.params.id];
-
-//   db.query(sql, params, (err, result) => {
-//     if (err) {
-//       res.statusMessage(400).json({ error: res.message });
-//     } else if (!result.affectedRows) {
-//       res.json({
-//         message: "Movie not found",
-//       });
-//     } else {
-//       res.json({
-//         message: "deleted",
-//         changes: result.affectedRows,
-//         id: req.params.id,
-//       });
-//     }
-//   });
-// });
-
-// // Read list of all reviews and associated movie name using LEFT JOIN
-// app.get("/api/movie-reviews", (req, res) => {
-//   const sql = `SELECT movies.movie_name AS movie, reviews.review FROM reviews LEFT JOIN movies ON reviews.movie_id = movies.id ORDER BY movies.movie_name;`;
-//   db.query(sql, (err, rows) => {
-//     if (err) {
-//       res.status(500).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: "success",
-//       data: rows,
-//     });
-//   });
-// });
